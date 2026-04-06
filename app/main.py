@@ -8,6 +8,10 @@ from app.services import (
     createActivity,
     startActivity,
     endActivity,
+    logScore,
+    exportScores,
+    resetActivity,
+    resetStudentPassword,
 )
 
 app = FastAPI(title="InClass LLM Platform")
@@ -38,6 +42,11 @@ def student_get_activity(email: str, password: str, course_id: str, activity_no:
     return getActivity(email, password, course_id, activity_no)
 
 
+@app.post("/student/log-score")
+def student_log_score(email: str, password: str, course_id: str, activity_no: int, score: float, meta: str | None = None):
+    return logScore(email, password, course_id, activity_no, score, meta)
+
+
 @app.post("/instructor/list-activities")
 def instructor_list_activities(email: str, password: str, course_id: str):
     return listActivities(email, password, course_id)
@@ -56,3 +65,18 @@ def instructor_start_activity(email: str, password: str, course_id: str, activit
 @app.post("/instructor/end-activity")
 def instructor_end_activity(email: str, password: str, course_id: str, activity_no: int):
     return endActivity(email, password, course_id, activity_no)
+
+
+@app.post("/instructor/export-scores")
+def instructor_export_scores(email: str, password: str, course_id: str, activity_no: int):
+    return exportScores(email, password, course_id, activity_no)
+
+
+@app.post("/instructor/reset-activity")
+def instructor_reset_activity(email: str, password: str, course_id: str, activity_no: int):
+    return resetActivity(email, password, course_id, activity_no)
+
+
+@app.post("/instructor/reset-student-password")
+def instructor_reset_student_password(email: str, password: str, course_id: str, student_email: str, new_password: str):
+    return resetStudentPassword(email, password, course_id, student_email, new_password)

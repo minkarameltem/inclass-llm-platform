@@ -1,3 +1,6 @@
+from typing import Optional
+
+
 def _success(data=None, message="Success"):
     return {
         "ok": True,
@@ -94,3 +97,42 @@ def endActivity(email: str, password: str, course_id: str, activity_no: int) -> 
         "activity_no": activity_no,
         "status": "ENDED"
     }, "Activity ended successfully")
+
+
+def logScore(email: str, password: str, course_id: str, activity_no: int, score: float, meta: Optional[str] = None) -> dict:
+    if not all([email, password, course_id]) or activity_no is None:
+        return _error("Missing required fields")
+
+    return _success({
+        "course_id": course_id,
+        "activity_no": activity_no,
+        "score": score,
+        "meta": meta
+    }, "Score logged successfully")
+
+
+def exportScores(email: str, password: str, course_id: str, activity_no: int) -> dict:
+    if not all([email, password, course_id]) or activity_no is None:
+        return _error("Missing required fields")
+
+    return _success({
+        "csv_content": "student_email,score\nstudent1@example.com,2\nstudent2@example.com,3"
+    }, "Scores exported successfully")
+
+
+def resetActivity(email: str, password: str, course_id: str, activity_no: int) -> dict:
+    if not all([email, password, course_id]) or activity_no is None:
+        return _error("Missing required fields")
+
+    return _success({
+        "course_id": course_id,
+        "activity_no": activity_no,
+        "status": "ENDED"
+    }, "Activity reset successfully")
+
+
+def resetStudentPassword(email: str, password: str, course_id: str, student_email: str, new_password: str) -> dict:
+    if not all([email, password, course_id, student_email, new_password]):
+        return _error("Missing required fields")
+
+    return _success(message="Student password reset successfully")
