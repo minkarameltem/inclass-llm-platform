@@ -77,6 +77,20 @@ def createActivity(email: str, password: str, course_id: str, activity_text: str
     return _success(activity, "Activity created successfully")
 
 
+def updateActivity(email: str, password: str, course_id: str, activity_no: int, activity_text: str, learning_objectives: list[str]) -> dict:
+    if not all([email, password, course_id, activity_text]) or activity_no is None or not learning_objectives:
+        return _error("Missing required fields")
+
+    updated_activity = {
+        "course_id": course_id,
+        "activity_no": activity_no,
+        "activity_text": activity_text,
+        "learning_objectives": learning_objectives,
+        "status": "NOT_STARTED"
+    }
+    return _success(updated_activity, "Activity updated successfully")
+
+
 def startActivity(email: str, password: str, course_id: str, activity_no: int) -> dict:
     if not all([email, password, course_id]) or activity_no is None:
         return _error("Missing required fields")
@@ -136,3 +150,31 @@ def resetStudentPassword(email: str, password: str, course_id: str, student_emai
         return _error("Missing required fields")
 
     return _success(message="Student password reset successfully")
+
+
+def changeStudentPassword(email: str, old_password: str, new_password: str) -> dict:
+    if not all([email, old_password, new_password]):
+        return _error("Missing required fields")
+
+    return _success(message="Student password changed successfully")
+
+
+def setStudentPassword(email: str, new_password: str) -> dict:
+    if not all([email, new_password]):
+        return _error("Missing required fields")
+
+    return _success(message="Student password set successfully")
+
+
+def changeInstructorPassword(email: str, old_password: str, new_password: str) -> dict:
+    if not all([email, old_password, new_password]):
+        return _error("Missing required fields")
+
+    return _success(message="Instructor password changed successfully")
+
+
+def setInstructorPassword(email: str, new_password: str) -> dict:
+    if not all([email, new_password]):
+        return _error("Missing required fields")
+
+    return _success(message="Instructor password set successfully")
