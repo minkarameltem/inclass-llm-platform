@@ -47,3 +47,50 @@ def getActivity(email: str, password: str, course_id: str, activity_no: int) -> 
         "status": "ACTIVE"
     }
     return _success(sample_activity, "Activity fetched successfully")
+
+
+def listActivities(email: str, password: str, course_id: str) -> dict:
+    if not all([email, password, course_id]):
+        return _error("Missing required fields")
+
+    activities = [
+        {"activity_no": 1, "status": "NOT_STARTED"},
+        {"activity_no": 2, "status": "ACTIVE"}
+    ]
+    return _success(activities, "Activities listed successfully")
+
+
+def createActivity(email: str, password: str, course_id: str, activity_text: str, learning_objectives: list[str], activity_no_optional: int | None = None) -> dict:
+    if not all([email, password, course_id, activity_text]) or not learning_objectives:
+        return _error("Missing required fields")
+
+    activity = {
+        "course_id": course_id,
+        "activity_no": activity_no_optional if activity_no_optional is not None else 1,
+        "activity_text": activity_text,
+        "learning_objectives": learning_objectives,
+        "status": "NOT_STARTED"
+    }
+    return _success(activity, "Activity created successfully")
+
+
+def startActivity(email: str, password: str, course_id: str, activity_no: int) -> dict:
+    if not all([email, password, course_id]) or activity_no is None:
+        return _error("Missing required fields")
+
+    return _success({
+        "course_id": course_id,
+        "activity_no": activity_no,
+        "status": "ACTIVE"
+    }, "Activity started successfully")
+
+
+def endActivity(email: str, password: str, course_id: str, activity_no: int) -> dict:
+    if not all([email, password, course_id]) or activity_no is None:
+        return _error("Missing required fields")
+
+    return _success({
+        "course_id": course_id,
+        "activity_no": activity_no,
+        "status": "ENDED"
+    }, "Activity ended successfully")
