@@ -1,4 +1,5 @@
 from typing import Optional
+from app.db import supabase
 
 
 def _success(data=None, message="Success"):
@@ -32,11 +33,14 @@ def listMyCourses(email: str, password: str) -> dict:
     if not email or not password:
         return _error("Email and password are required")
 
-    courses = [
-        {"course_id": "SE101", "course_name": "Software Engineering"},
-        {"course_id": "CS102", "course_name": "Intro to Programming"}
-    ]
-    return _success(courses, "Courses listed successfully")
+    if supabase is None:
+        return _error("Database connection is not configured")
+
+    try:
+        response = supabase.table("courses").select("*").execute()
+        return _success(response.data, "Courses listed successfully")
+    except Exception as e:
+        return _error(f"Database error: {str(e)}")
 
 
 def getActivity(email: str, password: str, course_id: str, activity_no: int) -> dict:
