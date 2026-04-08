@@ -143,22 +143,42 @@ def startActivity(email: str, password: str, course_id: str, activity_no: int) -
     if not all([email, password, course_id]) or activity_no is None:
         return _error("Missing required fields")
 
-    return _success({
-        "course_id": course_id,
-        "activity_no": activity_no,
-        "status": "ACTIVE"
-    }, "Activity started successfully")
+    if supabase is None:
+        return _error("Database connection is not configured")
+
+    try:
+        response = (
+            supabase
+            .table("activities")
+            .update({"status": "ACTIVE"})
+            .eq("course_id", course_id)
+            .eq("activity_no", activity_no)
+            .execute()
+        )
+        return _success(response.data, "Activity started successfully")
+    except Exception as e:
+        return _error(f"Database error: {str(e)}")
 
 
 def endActivity(email: str, password: str, course_id: str, activity_no: int) -> dict:
     if not all([email, password, course_id]) or activity_no is None:
         return _error("Missing required fields")
 
-    return _success({
-        "course_id": course_id,
-        "activity_no": activity_no,
-        "status": "ENDED"
-    }, "Activity ended successfully")
+    if supabase is None:
+        return _error("Database connection is not configured")
+
+    try:
+        response = (
+            supabase
+            .table("activities")
+            .update({"status": "ENDED"})
+            .eq("course_id", course_id)
+            .eq("activity_no", activity_no)
+            .execute()
+        )
+        return _success(response.data, "Activity ended successfully")
+    except Exception as e:
+        return _error(f"Database error: {str(e)}")
 
 
 def logScore(email: str, password: str, course_id: str, activity_no: int, score: float, meta: Optional[str] = None) -> dict:
@@ -186,11 +206,21 @@ def resetActivity(email: str, password: str, course_id: str, activity_no: int) -
     if not all([email, password, course_id]) or activity_no is None:
         return _error("Missing required fields")
 
-    return _success({
-        "course_id": course_id,
-        "activity_no": activity_no,
-        "status": "ENDED"
-    }, "Activity reset successfully")
+    if supabase is None:
+        return _error("Database connection is not configured")
+
+    try:
+        response = (
+            supabase
+            .table("activities")
+            .update({"status": "NOT_STARTED"})
+            .eq("course_id", course_id)
+            .eq("activity_no", activity_no)
+            .execute()
+        )
+        return _success(response.data, "Activity reset successfully")
+    except Exception as e:
+        return _error(f"Database error: {str(e)}")
 
 
 def resetStudentPassword(email: str, password: str, course_id: str, student_email: str, new_password: str) -> dict:
