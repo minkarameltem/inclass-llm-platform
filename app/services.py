@@ -47,13 +47,25 @@ def getActivity(email: str, password: str, course_id: str, activity_no: int) -> 
     if not all([email, password, course_id]) or activity_no is None:
         return _error("Missing required fields")
 
-    sample_activity = {
-        "course_id": course_id,
-        "activity_no": activity_no,
-        "activity_text": "Explain the difference between AI and Machine Learning.",
-        "status": "ACTIVE"
-    }
-    return _success(sample_activity, "Activity fetched successfully")
+    if supabase is None:
+        return _error("Database connection is not configured")
+
+    try:
+        response = (
+            supabase
+            .table("activities")
+            .select("*")
+            .eq("course_id", course_id)
+            .eq("activity_no", activity_no)
+            .execute()
+        )
+
+        if not response.data:
+            return _error("Activity not found")
+
+        return _success(response.data[0], "Activity fetched successfully")
+    except Exception as e:
+        return _error(f"Database error: {str(e)}")
 
 
 def listActivities(email: str, password: str, course_id: str) -> dict:
