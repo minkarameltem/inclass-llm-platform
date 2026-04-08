@@ -92,28 +92,51 @@ def createActivity(email: str, password: str, course_id: str, activity_text: str
     if not all([email, password, course_id, activity_text]) or not learning_objectives:
         return _error("Missing required fields")
 
-    activity = {
-        "course_id": course_id,
-        "activity_no": activity_no_optional if activity_no_optional is not None else 1,
-        "activity_text": activity_text,
-        "learning_objectives": learning_objectives,
-        "status": "NOT_STARTED"
-    }
-    return _success(activity, "Activity created successfully")
+    if supabase is None:
+        return _error("Database connection is not configured")
+
+    try:
+        activity_no = activity_no_optional if activity_no_optional is not None else 1
+
+        payload = {
+            "course_id": course_id,
+            "activity_no": activity_no,
+            "activity_text": activity_text,
+            "learning_objectives": ", ".join(learning_objectives),
+            "status": "NOT_STARTED"
+        }
+
+        response = supabase.table("activities").insert(payload).execute()
+        return _success(response.data, "Activity created successfully")
+    except Exception as e:
+        return _error(f"Database error: {str(e)}")
 
 
 def updateActivity(email: str, password: str, course_id: str, activity_no: int, activity_text: str, learning_objectives: list[str]) -> dict:
     if not all([email, password, course_id, activity_text]) or activity_no is None or not learning_objectives:
         return _error("Missing required fields")
 
-    updated_activity = {
-        "course_id": course_id,
-        "activity_no": activity_no,
-        "activity_text": activity_text,
-        "learning_objectives": learning_objectives,
-        "status": "NOT_STARTED"
-    }
-    return _success(updated_activity, "Activity updated successfully")
+    if supabase is None:
+        return _error("Database connection is not configured")
+
+    try:
+        payload = {
+            "activity_text": activity_text,
+            "learning_objectives": ", ".join(learning_objectives)
+        }
+
+        response = (
+            supabase
+            .table("activities")
+            .update(payload)
+            .eq("course_id", course_id)
+            .eq("activity_no", activity_no)
+            .execute()
+        )
+
+        return _success(response.data, "Activity updated successfully")
+    except Exception as e:
+        return _error(f"Database error: {str(e)}")
 
 
 def startActivity(email: str, password: str, course_id: str, activity_no: int) -> dict:
