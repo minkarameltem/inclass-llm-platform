@@ -185,21 +185,44 @@ def logScore(email: str, password: str, course_id: str, activity_no: int, score:
     if not all([email, password, course_id]) or activity_no is None:
         return _error("Missing required fields")
 
-    return _success({
-        "course_id": course_id,
-        "activity_no": activity_no,
-        "score": score,
-        "meta": meta
-    }, "Score logged successfully")
+    if supabase is None:
+        return _error("Database connection is not configured")
+
+    try:
+        payload = {
+            "student_email": email,
+            "course_id": course_id,
+            "activity_no": activity_no,
+            "score": score,
+            "meta": meta
+        }
+
+        response = supabase.table("scores").insert(payload).execute()
+        return _success(response.data, "Score logged successfully")
+    except Exception as e:
+        return _error(f"Database error: {str(e)}")
 
 
 def exportScores(email: str, password: str, course_id: str, activity_no: int) -> dict:
     if not all([email, password, course_id]) or activity_no is None:
         return _error("Missing required fields")
 
-    return _success({
-        "csv_content": "student_email,score\nstudent1@example.com,2\nstudent2@example.com,3"
-    }, "Scores exported successfully")
+    if supabase is None:
+        return _error("Database connection is not configured")
+
+    try:
+        response = (
+            supabase
+            .table("scores")
+            .select("*")
+            .eq("course_id", course_id)
+            .eq("activity_no", activity_no)
+            .execute()
+        )
+
+        return _success(response.data, "Scores exported successfully")
+    except Exception as e:
+        return _error(f"Database error: {str(e)}")
 
 
 def resetActivity(email: str, password: str, course_id: str, activity_no: int) -> dict:
