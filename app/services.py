@@ -60,11 +60,20 @@ def listActivities(email: str, password: str, course_id: str) -> dict:
     if not all([email, password, course_id]):
         return _error("Missing required fields")
 
-    activities = [
-        {"activity_no": 1, "status": "NOT_STARTED"},
-        {"activity_no": 2, "status": "ACTIVE"}
-    ]
-    return _success(activities, "Activities listed successfully")
+    if supabase is None:
+        return _error("Database connection is not configured")
+
+    try:
+        response = (
+            supabase
+            .table("activities")
+            .select("*")
+            .eq("course_id", course_id)
+            .execute()
+        )
+        return _success(response.data, "Activities listed successfully")
+    except Exception as e:
+        return _error(f"Database error: {str(e)}")
 
 
 def createActivity(email: str, password: str, course_id: str, activity_text: str, learning_objectives: list[str], activity_no_optional: int | None = None) -> dict:
