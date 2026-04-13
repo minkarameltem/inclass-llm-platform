@@ -63,7 +63,16 @@ def getActivity(email: str, password: str, course_id: str, activity_no: int) -> 
         if not response.data:
             return _error("Activity not found")
 
-        return _success(response.data[0], "Activity fetched successfully")
+        activity = response.data[0]
+        status = activity.get("status")
+
+        if status == "NOT_STARTED":
+            return _error("Activity has not started yet")
+
+        if status == "ENDED":
+            return _error("Activity has already ended")
+
+        return _success(activity, "Activity fetched successfully")
     except Exception as e:
         return _error(f"Database error: {str(e)}")
 
