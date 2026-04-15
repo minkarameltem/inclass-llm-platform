@@ -51,6 +51,18 @@ def getActivity(email: str, password: str, course_id: str, activity_no: int) -> 
         return _error("Database connection is not configured")
 
     try:
+        enrollment = (
+            supabase
+            .table("enrollments")
+            .select("*")
+            .eq("student_email", email)
+            .eq("course_id", course_id)
+            .execute()
+        )
+
+        if not enrollment.data:
+            return _error("Student not enrolled in this course")
+
         response = (
             supabase
             .table("activities")
@@ -228,7 +240,6 @@ def exportScores(email: str, password: str, course_id: str, activity_no: int) ->
             .eq("activity_no", activity_no)
             .execute()
         )
-
         return _success(response.data, "Scores exported successfully")
     except Exception as e:
         return _error(f"Database error: {str(e)}")
