@@ -161,6 +161,18 @@ def createActivity(email: str, password: str, course_id: str, activity_text: str
 
         activity_no = activity_no_optional if activity_no_optional is not None else 1
 
+        existing = (
+            supabase
+            .table("activities")
+            .select("*")
+            .eq("course_id", course_id)
+            .eq("activity_no", activity_no)
+            .execute()
+        )
+
+        if existing.data:
+            return _error("Activity number already exists")
+
         payload = {
             "course_id": course_id,
             "activity_no": activity_no,
@@ -185,6 +197,18 @@ def updateActivity(email: str, password: str, course_id: str, activity_no: int, 
     try:
         if not _check_instructor_ownership(email, course_id):
             return _error("You are not authorized for this course")
+
+        check = (
+            supabase
+            .table("activities")
+            .select("*")
+            .eq("course_id", course_id)
+            .eq("activity_no", activity_no)
+            .execute()
+        )
+
+        if not check.data:
+            return _error("Activity not found")
 
         payload = {
             "activity_text": activity_text,
@@ -216,6 +240,18 @@ def startActivity(email: str, password: str, course_id: str, activity_no: int) -
         if not _check_instructor_ownership(email, course_id):
             return _error("You are not authorized for this course")
 
+        check = (
+            supabase
+            .table("activities")
+            .select("*")
+            .eq("course_id", course_id)
+            .eq("activity_no", activity_no)
+            .execute()
+        )
+
+        if not check.data:
+            return _error("Activity not found")
+
         response = (
             supabase
             .table("activities")
@@ -240,6 +276,18 @@ def endActivity(email: str, password: str, course_id: str, activity_no: int) -> 
         if not _check_instructor_ownership(email, course_id):
             return _error("You are not authorized for this course")
 
+        check = (
+            supabase
+            .table("activities")
+            .select("*")
+            .eq("course_id", course_id)
+            .eq("activity_no", activity_no)
+            .execute()
+        )
+
+        if not check.data:
+            return _error("Activity not found")
+
         response = (
             supabase
             .table("activities")
@@ -257,10 +305,28 @@ def logScore(email: str, password: str, course_id: str, activity_no: int, score:
     if not all([email, password, course_id]) or activity_no is None:
         return _error("Missing required fields")
 
+    if score < 0 or score > 100:
+        return _error("Score must be between 0 and 100")
+
     if supabase is None:
         return _error("Database connection is not configured")
 
     try:
+        activity_check = (
+            supabase
+            .table("activities")
+            .select("*")
+            .eq("course_id", course_id)
+            .eq("activity_no", activity_no)
+            .execute()
+        )
+
+        if not activity_check.data:
+            return _error("Activity not found")
+
+        if activity_check.data[0]["status"] == "ENDED":
+            return _error("Cannot submit score for ended activity")
+
         payload = {
             "student_email": email,
             "course_id": course_id,
@@ -310,6 +376,18 @@ def resetActivity(email: str, password: str, course_id: str, activity_no: int) -
     try:
         if not _check_instructor_ownership(email, course_id):
             return _error("You are not authorized for this course")
+
+        check = (
+            supabase
+            .table("activities")
+            .select("*")
+            .eq("course_id", course_id)
+            .eq("activity_no", activity_no)
+            .execute()
+        )
+
+        if not check.data:
+            return _error("Activity not found")
 
         response = (
             supabase
