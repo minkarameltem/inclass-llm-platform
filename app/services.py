@@ -17,6 +17,22 @@ def _error(message="Error"):
     }
 
 
+def _check_instructor_ownership(email: str, course_id: str) -> bool:
+    if supabase is None:
+        return False
+
+    ownership = (
+        supabase
+        .table("course_owners")
+        .select("*")
+        .eq("instructor_email", email)
+        .eq("course_id", course_id)
+        .execute()
+    )
+
+    return bool(ownership.data)
+
+
 def studentLogin(email: str, password: str) -> dict:
     if not email or not password:
         return _error("Email and password are required")
@@ -117,6 +133,9 @@ def listActivities(email: str, password: str, course_id: str) -> dict:
         return _error("Database connection is not configured")
 
     try:
+        if not _check_instructor_ownership(email, course_id):
+            return _error("You are not authorized for this course")
+
         response = (
             supabase
             .table("activities")
@@ -137,6 +156,9 @@ def createActivity(email: str, password: str, course_id: str, activity_text: str
         return _error("Database connection is not configured")
 
     try:
+        if not _check_instructor_ownership(email, course_id):
+            return _error("You are not authorized for this course")
+
         activity_no = activity_no_optional if activity_no_optional is not None else 1
 
         payload = {
@@ -161,6 +183,9 @@ def updateActivity(email: str, password: str, course_id: str, activity_no: int, 
         return _error("Database connection is not configured")
 
     try:
+        if not _check_instructor_ownership(email, course_id):
+            return _error("You are not authorized for this course")
+
         payload = {
             "activity_text": activity_text,
             "learning_objectives": ", ".join(learning_objectives)
@@ -188,6 +213,9 @@ def startActivity(email: str, password: str, course_id: str, activity_no: int) -
         return _error("Database connection is not configured")
 
     try:
+        if not _check_instructor_ownership(email, course_id):
+            return _error("You are not authorized for this course")
+
         response = (
             supabase
             .table("activities")
@@ -209,6 +237,9 @@ def endActivity(email: str, password: str, course_id: str, activity_no: int) -> 
         return _error("Database connection is not configured")
 
     try:
+        if not _check_instructor_ownership(email, course_id):
+            return _error("You are not authorized for this course")
+
         response = (
             supabase
             .table("activities")
@@ -252,6 +283,9 @@ def exportScores(email: str, password: str, course_id: str, activity_no: int) ->
         return _error("Database connection is not configured")
 
     try:
+        if not _check_instructor_ownership(email, course_id):
+            return _error("You are not authorized for this course")
+
         response = (
             supabase
             .table("scores")
@@ -274,6 +308,9 @@ def resetActivity(email: str, password: str, course_id: str, activity_no: int) -
         return _error("Database connection is not configured")
 
     try:
+        if not _check_instructor_ownership(email, course_id):
+            return _error("You are not authorized for this course")
+
         response = (
             supabase
             .table("activities")
