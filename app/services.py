@@ -37,7 +37,27 @@ def listMyCourses(email: str, password: str) -> dict:
         return _error("Database connection is not configured")
 
     try:
-        response = supabase.table("courses").select("*").execute()
+        ownership = (
+            supabase
+            .table("course_owners")
+            .select("*")
+            .eq("instructor_email", email)
+            .execute()
+        )
+
+        if not ownership.data:
+            return _success([], "Courses listed successfully")
+
+        course_ids = [row["course_id"] for row in ownership.data if row.get("course_id")]
+
+        response = (
+            supabase
+            .table("courses")
+            .select("*")
+            .in_("course_id", course_ids)
+            .execute()
+        )
+
         return _success(response.data, "Courses listed successfully")
     except Exception as e:
         return _error(f"Database error: {str(e)}")
@@ -240,6 +260,7 @@ def exportScores(email: str, password: str, course_id: str, activity_no: int) ->
             .eq("activity_no", activity_no)
             .execute()
         )
+
         return _success(response.data, "Scores exported successfully")
     except Exception as e:
         return _error(f"Database error: {str(e)}")
