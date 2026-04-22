@@ -364,6 +364,19 @@ def logScore(
         if activity_check.data[0]["status"] == "ENDED":
             return _error("Cannot submit score for ended activity")
 
+        existing = (
+            supabase
+            .table("scores")
+            .select("*")
+            .eq("student_email", email)
+            .eq("course_id", course_id)
+            .eq("activity_no", activity_no)
+            .execute()
+        )
+
+        if existing.data:
+            return _error("Score already submitted for this activity")
+
         payload = {
             "student_email": email,
             "course_id": course_id,
@@ -526,6 +539,47 @@ def getLeaderboard(email: str, password: str, course_id: str) -> dict:
         leaderboard.sort(key=lambda x: x["average_score"], reverse=True)
 
         return _success(leaderboard, "Leaderboard generated successfully")
+
+    except Exception as e:
+        return _error(f"Database error: {str(e)}")
+
+
+def getActivityStats(email: str, password: str, course_id: str, activity_no: int) -> dict:
+    if not all([email, password, course_id]) or activity_no is None:
+        return _error("Missing required fields")
+
+    if supabase is None:
+        return _error("Database connection is not configured")
+
+    try:
+        if not _check_instructor_ownership(email, course_id):
+            return _error("You are not authorized for this course")
+
+        response = (
+            supabase
+            .table("scores")
+            .select("*")
+            .eq("course_id", course_id)
+            .eq("activity_no", activity_no)
+            .execute()
+        )
+
+        if not response.data:
+            return _success({}, "No scores found")
+
+        scores = [row["score"] for row in response.data]
+
+        avg_score = sum(scores) / len(scores)
+        max_score = max(scores)
+        min_score = min(scores)
+        participant_count = len(scores)
+
+        return _success({
+            "average_score": round(avg_score, 2),
+            "max_score": max_score,
+            "min_score": min_score,
+            "participant_count": participant_count
+        }, "Activity stats generated successfully")
 
     except Exception as e:
         return _error(f"Database error: {str(e)}")
