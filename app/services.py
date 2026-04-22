@@ -435,3 +435,59 @@ def setInstructorPassword(email: str, new_password: str) -> dict:
         return _error("Missing required fields")
 
     return _success(message="Instructor password set successfully")
+
+def getLeaderboard(email: str, password: str, course_id: str) -> dict:
+    if not all([email, password, course_id]):
+        return _error("Missing required fields")
+
+    if supabase is None:
+        return _error("Database connection is not configured")
+
+    try:
+        if not _check_instructor_ownership(email, course_id):
+            return _error("You are not authorized for this course")
+
+        response = (
+            supabase
+            .table("scores")
+            .select("*")
+            .eq("course_id", course_id)
+            .execute()
+        )
+
+        if not response.data:
+            return _success([], "No scores found")
+
+        scores = response.data
+        student_scores = {}
+
+        for row in scores:
+            student = row["student_email"]
+            score = row["score"]
+
+            if student not in student_scores:
+                student_scores[student] = {
+                    "total": 0,
+                    "count": 0
+                }
+
+            student_scores[student]["total"] += score
+            student_scores[student]["count"] += 1
+
+        leaderboard = []
+
+        for student, data in student_scores.items():
+            avg = data["total"] / data["count"]
+
+            leaderboard.append({
+                "student_email": student,
+                "average_score": round(avg, 2),
+                "total_score": data["total"]
+            })
+
+        leaderboard.sort(key=lambda x: x["average_score"], reverse=True)
+
+        return _success(leaderboard, "Leaderboard generated successfully")
+
+    except Exception as e:
+        return _error(f"Database error: {str(e)}")
