@@ -1,6 +1,8 @@
 from dotenv import load_dotenv
 load_dotenv()
 
+from app.services import getLeaderboard
+
 from fastapi import FastAPI
 from app.services import (
     studentLogin,
@@ -113,3 +115,7 @@ def instructor_reset_activity(email: str, password: str, course_id: str, activit
 @app.post("/instructor/reset-student-password")
 def instructor_reset_student_password(email: str, password: str, course_id: str, student_email: str, new_password: str):
     return resetStudentPassword(email, password, course_id, student_email, new_password)
+
+@app.post("/instructor/leaderboard")
+def instructor_leaderboard(email: str, password: str, course_id: str):
+    return getLeaderboard(email, password, course_id)
