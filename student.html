@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Student Panel</title>
+</head>
+<body>
+
+<h2>Student Panel</h2>
+
+Email: <input id="email"><br><br>
+Password: <input id="password" type="password"><br><br>
+Course ID: <input id="course"><br><br>
+Activity No: <input id="activity" type="number"><br><br>
+
+<button onclick="getActivity()">Activity Getir</button>
+
+<p id="result"></p>
+
+<script>
+function getActivity() {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+  const course = document.getElementById("course").value;
+  const activity = document.getElementById("activity").value;
+
+  fetch(`http://127.0.0.1:8000/student/get-activity?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}&course_id=${encodeURIComponent(course)}&activity_no=${encodeURIComponent(activity)}`, {
+    method: "POST"
+  })
+  .then(res => res.json())
+  .then(data => {
+    document.getElementById("result").innerText = JSON.stringify(data, null, 2);
+  })
+  .catch(err => {
+    document.getElementById("result").innerText = "Hata: " + err;
+  });
+}
+</script>
+
+</body>
+</html>
