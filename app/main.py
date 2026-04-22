@@ -4,6 +4,7 @@ load_dotenv()
 from app.services import getLeaderboard
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from app.services import (
     studentLogin,
     instructorLogin,
