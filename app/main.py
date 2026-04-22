@@ -2,6 +2,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from app.services import getLeaderboard
+from app.services import getActivityStats
 
 from fastapi import FastAPI
 from app.services import (
@@ -119,3 +120,7 @@ def instructor_reset_student_password(email: str, password: str, course_id: str,
 @app.post("/instructor/leaderboard")
 def instructor_leaderboard(email: str, password: str, course_id: str):
     return getLeaderboard(email, password, course_id)
+
+@app.post("/instructor/activity-stats")
+def instructor_activity_stats(email: str, password: str, course_id: str, activity_no: int):
+    return getActivityStats(email, password, course_id, activity_no)
