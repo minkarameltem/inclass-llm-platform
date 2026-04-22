@@ -1,28 +1,27 @@
 from dotenv import load_dotenv
 load_dotenv()
 
-from app.services import getLeaderboard
-from app.services import getActivityStats
-
 from fastapi import FastAPI
 from app.services import (
     studentLogin,
-    instructorLogin,
-    listMyCourses,
+    changeStudentPassword,
+    setStudentPassword,
     getActivity,
+    logScore,
+    instructorLogin,
+    changeInstructorPassword,
+    setInstructorPassword,
+    listMyCourses,
     listActivities,
     createActivity,
     updateActivity,
     startActivity,
     endActivity,
-    logScore,
     exportScores,
     resetActivity,
     resetStudentPassword,
-    changeStudentPassword,
-    setStudentPassword,
-    changeInstructorPassword,
-    setInstructorPassword,
+    getLeaderboard,
+    getActivityStats,
 )
 
 app = FastAPI(title="InClass LLM Platform")
@@ -39,13 +38,13 @@ def student_login(email: str, password: str):
 
 
 @app.post("/student/change-password")
-def student_change_password(email: str, old_password: str, new_password: str):
-    return changeStudentPassword(email, old_password, new_password)
+def student_change_password(email: str, password: str, new_password: str, old_password: str):
+    return changeStudentPassword(email, password, new_password, old_password)
 
 
 @app.post("/student/set-password")
-def student_set_password(email: str, new_password: str):
-    return setStudentPassword(email, new_password)
+def student_set_password(email: str, password: str):
+    return setStudentPassword(email, password)
 
 
 @app.post("/student/get-activity")
@@ -64,13 +63,13 @@ def instructor_login(email: str, password: str):
 
 
 @app.post("/instructor/change-password")
-def instructor_change_password(email: str, old_password: str, new_password: str):
-    return changeInstructorPassword(email, old_password, new_password)
+def instructor_change_password(email: str, password: str, old_password: str, new_password: str):
+    return changeInstructorPassword(email, password, old_password, new_password)
 
 
 @app.post("/instructor/set-password")
-def instructor_set_password(email: str, new_password: str):
-    return setInstructorPassword(email, new_password)
+def instructor_set_password(email: str, password: str | None = None):
+    return setInstructorPassword(email, password)
 
 
 @app.post("/instructor/list-my-courses")
@@ -89,8 +88,8 @@ def instructor_create_activity(email: str, password: str, course_id: str, activi
 
 
 @app.post("/instructor/update-activity")
-def instructor_update_activity(email: str, password: str, course_id: str, activity_no: int, activity_text: str, learning_objectives: list[str]):
-    return updateActivity(email, password, course_id, activity_no, activity_text, learning_objectives)
+def instructor_update_activity(email: str, password: str, course_id: str, activity_no: int, patch: dict):
+    return updateActivity(email, password, course_id, activity_no, patch)
 
 
 @app.post("/instructor/start-activity")
@@ -117,9 +116,11 @@ def instructor_reset_activity(email: str, password: str, course_id: str, activit
 def instructor_reset_student_password(email: str, password: str, course_id: str, student_email: str, new_password: str):
     return resetStudentPassword(email, password, course_id, student_email, new_password)
 
+
 @app.post("/instructor/leaderboard")
 def instructor_leaderboard(email: str, password: str, course_id: str):
     return getLeaderboard(email, password, course_id)
+
 
 @app.post("/instructor/activity-stats")
 def instructor_activity_stats(email: str, password: str, course_id: str, activity_no: int):
