@@ -1,39 +1,38 @@
 <!DOCTYPE html>
-<html>
+<html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <title>Student Panel</title>
+<meta charset="UTF-8">
+<title>Student Panel</title>
+<style>
+body{font-family:Arial;background:#f4f6f8;padding:30px}
+.box{max-width:520px;margin:auto;background:#fff;padding:20px;border-radius:10px}
+input{width:100%;padding:10px;margin:6px 0 14px}
+button{width:100%;padding:10px;border:0;background:#2563eb;color:#fff;border-radius:6px}
+pre{background:#eee;padding:10px;white-space:pre-wrap}
+</style>
 </head>
 <body>
-
+<div class="box">
 <h2>Student Panel</h2>
 
-Email: <input id="email"><br><br>
-Password: <input id="password" type="password"><br><br>
-Course ID: <input id="course"><br><br>
-Activity No: <input id="activity" type="number"><br><br>
+<input id="email" value="test@test.com">
+<input id="password" value="1234">
+<input id="course" value="SE101">
+<input id="activity" value="3">
 
 <button onclick="getActivity()">Activity Getir</button>
 
-<p id="result"></p>
+<pre id="out"></pre>
+</div>
 
 <script>
-function getActivity() {
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
-  const course = document.getElementById("course").value;
-  const activity = document.getElementById("activity").value;
+const API="http://127.0.0.1:8000";
 
-  fetch(`http://127.0.0.1:8000/student/get-activity?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}&course_id=${encodeURIComponent(course)}&activity_no=${encodeURIComponent(activity)}`, {
-    method: "POST"
-  })
-  .then(res => res.json())
-  .then(data => {
-    document.getElementById("result").innerText = JSON.stringify(data, null, 2);
-  })
-  .catch(err => {
-    document.getElementById("result").innerText = "Hata: " + err;
-  });
+function getActivity(){
+  fetch(`${API}/student/get-activity?email=${email.value}&password=${password.value}&course_id=${course.value}&activity_no=${activity.value}`,{method:"POST"})
+  .then(r=>r.json())
+  .then(j=> out.textContent=JSON.stringify(j,null,2))
+  .catch(e=> out.textContent="ERROR: "+e);
 }
 </script>
 
