@@ -36,6 +36,13 @@ def _check_instructor_ownership(email: str, course_id: str) -> bool:
 def studentLogin(email: str, password: str) -> dict:
     if not email or not password:
         return _error("Email and password are required")
+    
+        # ===== VALIDATION =====
+    if "@" not in email:
+        return _error("Invalid email format")
+    if len(password) < 4:
+        return _error("Password must be at least 4 characters")
+        # ======================
     return _success({"email": email, "role": "student"}, "Student login successful")
 
 
