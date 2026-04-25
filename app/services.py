@@ -525,10 +525,35 @@ def exportScores(email: str, password: str, course_id: str, activity_no: int) ->
             .execute()
         )
 
-        return _success(response.data, "Scores exported successfully")
+        rows = response.data or []
+
+        csv_lines = [
+            "student_email,course_id,activity_no,score,meta,is_achieved"
+        ]
+
+        for row in rows:
+            student_email = str(row.get("student_email", ""))
+            row_course_id = str(row.get("course_id", ""))
+            row_activity_no = str(row.get("activity_no", ""))
+            score = str(row.get("score", ""))
+            meta = str(row.get("meta", "")).replace('"', '""')
+            is_achieved = str(row.get("is_achieved", ""))
+
+            csv_lines.append(
+                f'"{student_email}","{row_course_id}","{row_activity_no}","{score}","{meta}","{is_achieved}"'
+            )
+
+        csv_text = "\n".join(csv_lines)
+
+        return {
+            "ok": True,
+            "message": "Scores exported successfully",
+            "data": rows,
+            "csv": csv_text
+        }
+
     except Exception as e:
         return _error(f"Database error: {str(e)}")
-
 
 def resetActivity(email: str, password: str, course_id: str, activity_no: int) -> dict:
     if not all([email, password, course_id]) or activity_no is None:
