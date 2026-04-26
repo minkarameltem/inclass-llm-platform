@@ -501,7 +501,6 @@ def endActivity(email: str, password: str, course_id: str, activity_no: int) -> 
     except Exception as e:
         return _error(f"Database error: {str(e)}")
 
-
 def exportScores(email: str, password: str, course_id: str, activity_no: int) -> dict:
     if not all([email, password, course_id]) or activity_no is None:
         return _error("Missing required fields")
@@ -527,6 +526,7 @@ def exportScores(email: str, password: str, course_id: str, activity_no: int) ->
 
         rows = response.data or []
 
+        # CSV oluştur
         csv_lines = [
             "student_email,course_id,activity_no,score,meta,is_achieved"
         ]
@@ -554,7 +554,7 @@ def exportScores(email: str, password: str, course_id: str, activity_no: int) ->
 
     except Exception as e:
         return _error(f"Database error: {str(e)}")
-
+    
 def resetActivity(email: str, password: str, course_id: str, activity_no: int) -> dict:
     if not all([email, password, course_id]) or activity_no is None:
         return _error("Missing required fields")
