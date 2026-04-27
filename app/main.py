@@ -126,3 +126,7 @@ def instructor_leaderboard(email: str, password: str, course_id: str):
 @app.post("/instructor/activity-stats")
 def instructor_activity_stats(email: str, password: str, course_id: str, activity_no: int):
     return getActivityStats(email, password, course_id, activity_no)
+
+@app.get("/health")
+def health_check():
+    return {"status": "ok"}
