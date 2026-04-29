@@ -1,3 +1,4 @@
+import email
 from typing import Optional
 from app.db import supabase
 
@@ -146,6 +147,13 @@ def listMyCourses(email: str, password: str) -> dict:
 def getActivity(email: str, password: str, course_id: str, activity_no: int) -> dict:
     if not all([email, password, course_id]) or activity_no is None:
         return _error("Missing required fields")
+
+    if "@" not in email:
+        return _error("Invalid email format")
+    if len(password) < 4:
+        return _error("Password must be at least 4 characters")
+    if activity_no <= 0:
+        return _error("activity_no must be positive")
 
     if supabase is None:
         return _error("Database connection is not configured")
