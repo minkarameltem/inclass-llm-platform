@@ -350,6 +350,17 @@ def listActivities(email: str, password: str, course_id: str) -> dict:
 def createActivity(email: str, password: str, course_id: str, activity_text: str, learning_objectives: list[str], activity_no_optional: int | None = None) -> dict[str, object]:
     if not all([email, password, course_id, activity_text]) or not learning_objectives:
         return _error("Missing required fields")
+    
+    if "@" not in email:
+        return _error("Invalid email format")
+    if len(password) < 4:
+        return _error("Password must be at least 4 characters")
+    if len(activity_text) < 10:
+        return _error("activity_text must be at least 10 characters")
+    if not isinstance(learning_objectives, list) or len(learning_objectives) == 0:
+        return _error("learning_objectives must be a non-empty list")
+    if activity_no_optional is not None and activity_no_optional <= 0:
+        return _error("activity_no must be positive")
 
     if supabase is None:
         return _error("Database connection is not configured")
