@@ -13,9 +13,17 @@ function activityNo() {
   return document.getElementById("activityNo").value.trim();
 }
 
+function niceMessage(data, successText) {
+  if (data.ok) {
+    return "✔ " + successText;
+  }
+  return "✖ " + data.message;
+}
+
 async function login() {
   const data = await postRequest("/instructor/login", inst());
-  show("loginOut", data);
+  document.getElementById("loginOut").textContent =
+    niceMessage(data, "Instructor login successful.");
 }
 
 async function listActivities() {
@@ -23,7 +31,21 @@ async function listActivities() {
     ...inst(),
     course_id: courseId()
   });
-  show("activityOut", data);
+
+  if (!data.ok) {
+    document.getElementById("activityOut").textContent = "✖ " + data.message;
+    return;
+  }
+
+  const activities = data.data || [];
+  let text = "✔ Activities listed successfully.\n\n";
+
+  activities.forEach(a => {
+    text += `Activity ${a.activity_no} | Status: ${a.status}\n`;
+    text += `${a.activity_text}\n\n`;
+  });
+
+  document.getElementById("activityOut").textContent = text;
 }
 
 async function createActivity() {
@@ -34,7 +56,8 @@ async function createActivity() {
     activity_no_optional: document.getElementById("newActivityNo").value
   }, ["Message types", "Message format"]);
 
-  show("createOut", data);
+  document.getElementById("createOut").textContent =
+    niceMessage(data, "Activity created successfully.");
 }
 
 async function startActivity() {
@@ -43,7 +66,9 @@ async function startActivity() {
     course_id: courseId(),
     activity_no: activityNo()
   });
-  show("activityOut", data);
+
+  document.getElementById("activityOut").textContent =
+    niceMessage(data, "Activity started successfully.");
 }
 
 async function endActivity() {
@@ -52,7 +77,9 @@ async function endActivity() {
     course_id: courseId(),
     activity_no: activityNo()
   });
-  show("activityOut", data);
+
+  document.getElementById("activityOut").textContent =
+    niceMessage(data, "Activity ended successfully.");
 }
 
 async function exportScores() {
@@ -61,7 +88,24 @@ async function exportScores() {
     course_id: courseId(),
     activity_no: activityNo()
   });
-  show("scoreOut", data);
+
+  if (!data.ok) {
+    document.getElementById("scoreOut").textContent = "✖ " + data.message;
+    return;
+  }
+
+  const rows = data.data || [];
+  let text = "✔ Scores exported successfully.\n\n";
+
+  if (rows.length === 0) {
+    text += "No score records found for this activity.";
+  } else {
+    rows.forEach(r => {
+      text += `${r.student_email} | Score: ${r.score} | Meta: ${r.meta}\n`;
+    });
+  }
+
+  document.getElementById("scoreOut").textContent = text;
 }
 
 async function leaderboard() {
@@ -69,7 +113,15 @@ async function leaderboard() {
     ...inst(),
     course_id: courseId()
   });
-  show("scoreOut", data);
+
+  if (!data.ok) {
+    document.getElementById("scoreOut").textContent = "✖ " + data.message;
+    return;
+  }
+
+  document.getElementById("scoreOut").textContent =
+    "✔ Leaderboard loaded successfully.\n\n" +
+    JSON.stringify(data.data, null, 2);
 }
 
 async function stats() {
@@ -78,5 +130,13 @@ async function stats() {
     course_id: courseId(),
     activity_no: activityNo()
   });
-  show("scoreOut", data);
+
+  if (!data.ok) {
+    document.getElementById("scoreOut").textContent = "✖ " + data.message;
+    return;
+  }
+
+  document.getElementById("scoreOut").textContent =
+    "✔ Activity statistics loaded successfully.\n\n" +
+    JSON.stringify(data.data, null, 2);
 }
