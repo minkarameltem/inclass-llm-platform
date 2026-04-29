@@ -313,6 +313,9 @@ def listActivities(email: str, password: str, course_id: str) -> dict:
     if not all([email, password, course_id]):
         return _error("Missing required fields")
 
+    if "@" not in email:
+        return _error("Invalid email format")
+        
     if supabase is None:
         return _error("Database connection is not configured")
 
