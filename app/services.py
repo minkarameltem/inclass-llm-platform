@@ -607,6 +607,11 @@ def exportScores(email: str, password: str, course_id: str, activity_no: int) ->
 def resetActivity(email: str, password: str, course_id: str, activity_no: int) -> dict:
     if not all([email, password, course_id]) or activity_no is None:
         return _error("Missing required fields")
+    
+    if "@" not in email:
+        return _error("Invalid email format")
+    if activity_no <= 0:
+        return _error("activity_no must be positive")
 
     if supabase is None:
         return _error("Database connection is not configured")
