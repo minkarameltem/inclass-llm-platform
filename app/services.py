@@ -106,6 +106,9 @@ def instructorLogin(email: str, password: str) -> dict:
 def listMyCourses(email: str, password: str) -> dict:
     if not email or not password:
         return _error("Email and password are required")
+    
+    if "@" not in email:
+        return _error("Invalid email format")
 
     if supabase is None:
         return _error("Database connection is not configured")
