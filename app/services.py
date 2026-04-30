@@ -1,3 +1,4 @@
+import email
 from typing import Optional
 from app.db import supabase
 
@@ -86,6 +87,13 @@ def studentLogin(email: str, password: str) -> dict:
 def instructorLogin(email: str, password: str) -> dict:
     if not email or not password:
         return _error("Email and password are required")
+    
+    
+    if "@" not in email:
+        return _error("Invalid email format")
+    if len(password) < 4:
+        return _error("Password must be at least 4 characters")
+    
 
     if supabase is None:
         return _error("Database connection is not configured")
@@ -99,6 +107,9 @@ def instructorLogin(email: str, password: str) -> dict:
 def listMyCourses(email: str, password: str) -> dict:
     if not email or not password:
         return _error("Email and password are required")
+    
+    if "@" not in email:
+        return _error("Invalid email format")
 
     if supabase is None:
         return _error("Database connection is not configured")
@@ -136,6 +147,13 @@ def listMyCourses(email: str, password: str) -> dict:
 def getActivity(email: str, password: str, course_id: str, activity_no: int) -> dict:
     if not all([email, password, course_id]) or activity_no is None:
         return _error("Missing required fields")
+
+    if "@" not in email:
+        return _error("Invalid email format")
+    if len(password) < 4:
+        return _error("Password must be at least 4 characters")
+    if activity_no <= 0:
+        return _error("activity_no must be positive")
 
     if supabase is None:
         return _error("Database connection is not configured")
@@ -303,6 +321,9 @@ def listActivities(email: str, password: str, course_id: str) -> dict:
     if not all([email, password, course_id]):
         return _error("Missing required fields")
 
+    if "@" not in email:
+        return _error("Invalid email format")
+        
     if supabase is None:
         return _error("Database connection is not configured")
 
@@ -329,6 +350,17 @@ def listActivities(email: str, password: str, course_id: str) -> dict:
 def createActivity(email: str, password: str, course_id: str, activity_text: str, learning_objectives: list[str], activity_no_optional: int | None = None) -> dict[str, object]:
     if not all([email, password, course_id, activity_text]) or not learning_objectives:
         return _error("Missing required fields")
+    
+    if "@" not in email:
+        return _error("Invalid email format")
+    if len(password) < 4:
+        return _error("Password must be at least 4 characters")
+    if len(activity_text) < 10:
+        return _error("activity_text must be at least 10 characters")
+    if not isinstance(learning_objectives, list) or len(learning_objectives) == 0:
+        return _error("learning_objectives must be a non-empty list")
+    if activity_no_optional is not None and activity_no_optional <= 0:
+        return _error("activity_no must be positive")
 
     if supabase is None:
         return _error("Database connection is not configured")
@@ -422,6 +454,11 @@ def updateActivity(email: str, password: str, course_id: str, activity_no: int, 
 def startActivity(email: str, password: str, course_id: str, activity_no: int) -> dict:
     if not all([email, password, course_id]) or activity_no is None:
         return _error("Missing required fields")
+    
+    if "@" not in email:
+        return _error("Invalid email format")
+    if activity_no <= 0:
+        return _error("activity_no must be positive")
 
     if supabase is None:
         return _error("Database connection is not configured")
@@ -467,6 +504,11 @@ def startActivity(email: str, password: str, course_id: str, activity_no: int) -
 def endActivity(email: str, password: str, course_id: str, activity_no: int) -> dict:
     if not all([email, password, course_id]) or activity_no is None:
         return _error("Missing required fields")
+    
+    if "@" not in email:
+        return _error("Invalid email format")
+    if activity_no <= 0:
+        return _error("activity_no must be positive")
 
     if supabase is None:
         return _error("Database connection is not configured")
@@ -511,6 +553,11 @@ def endActivity(email: str, password: str, course_id: str, activity_no: int) -> 
 def exportScores(email: str, password: str, course_id: str, activity_no: int) -> dict:
     if not all([email, password, course_id]) or activity_no is None:
         return _error("Missing required fields")
+    
+    if "@" not in email:
+        return _error("Invalid email format")
+    if activity_no <= 0:
+        return _error("activity_no must be positive")
 
     if supabase is None:
         return _error("Database connection is not configured")
@@ -565,6 +612,11 @@ def exportScores(email: str, password: str, course_id: str, activity_no: int) ->
 def resetActivity(email: str, password: str, course_id: str, activity_no: int) -> dict:
     if not all([email, password, course_id]) or activity_no is None:
         return _error("Missing required fields")
+    
+    if "@" not in email:
+        return _error("Invalid email format")
+    if activity_no <= 0:
+        return _error("activity_no must be positive")
 
     if supabase is None:
         return _error("Database connection is not configured")
