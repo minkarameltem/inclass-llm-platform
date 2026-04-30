@@ -22,12 +22,26 @@ function niceMessage(data, successText) {
 
 async function login() {
   const data = await postRequest("/student/login", student());
+
   document.getElementById("loginOut").textContent =
     niceMessage(data, "Student login successful.");
 
   if (data.ok) {
-    document.getElementById("welcomeBox").textContent =
-      "Welcome, " + document.getElementById("email").value;
+    const email = document.getElementById("email").value;
+
+    document.getElementById("welcomeBox").innerHTML =
+      "👋 Welcome<br><span style='font-size:14px; font-weight:700;'>" + email + "</span>";
+
+    showToast("🚀 Dashboard unlocked!");
+
+    const loginPanel = document.getElementById("loginPanel");
+    if (loginPanel) {
+      setTimeout(() => {
+        loginPanel.style.display = "none";
+      }, 700);
+    }
+
+    animatePanels();
   }
 }
 
@@ -57,7 +71,9 @@ async function getActivity() {
 
   text += "\n\nLearning objectives are hidden from student view.";
 
-  document.getElementById("activityOut").textContent = text;
+  document.getElementById("activityOut").textContent = renderActivityCard(activity);
+  document.getElementById("activityOut").classList.add("activity-card");
+  showToast("📘 Activity loaded successfully!");
 }
 
 async function logScore() {
@@ -71,10 +87,55 @@ async function logScore() {
 
   document.getElementById("scoreOut").textContent =
     niceMessage(data, "Score submitted successfully.");
+
+  if (data.ok) {
+    showToast("🎉 Score submitted successfully!");
+  }
 }
 function fillDemoStudent() {
   document.getElementById("email").value = "erkisie@mef.edu.tr";
   document.getElementById("password").value = "elif123";
   document.getElementById("courseId").value = "COMP302";
   document.getElementById("activityNo").value = "4";
+}
+
+
+function showToast(message) {
+  const oldToast = document.querySelector(".toast");
+  if (oldToast) oldToast.remove();
+
+  const toast = document.createElement("div");
+  toast.className = "toast";
+  toast.textContent = message;
+  document.body.appendChild(toast);
+
+  setTimeout(() => toast.remove(), 2200);
+}
+
+function animatePanels() {
+  document.querySelectorAll(".panel").forEach((panel, index) => {
+    setTimeout(() => panel.classList.add("fade-in"), index * 120);
+  });
+}
+
+function renderActivityCard(activity) {
+  return `
+📘 Course: ${activity.course_id || "COMP302"}
+🧩 Activity No: ${activity.activity_no || document.getElementById("activityNo").value}
+🟢 Status: ${activity.status || "ACTIVE"}
+
+📝 Activity:
+${activity.activity_text || "Activity is available."}
+
+🎯 Learning objectives are hidden from student view.
+`;
+}
+console.log("JS LOADED 🚀");
+
+
+
+function resetScoreForm() {
+  document.getElementById("score").value = "";
+  document.getElementById("meta").value = "";
+  document.getElementById("scoreOut").textContent = "Score form cleared.";
 }

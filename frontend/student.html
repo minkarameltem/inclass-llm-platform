@@ -22,7 +22,7 @@
       <p>Join an active activity and submit your progress.</p>
     </div>
 
-    <section class="panel">
+    <section class="panel" id="loginPanel">
       <h3>Student Login</h3>
       <div class="form-grid">
         <input id="email" value="erkisie@mef.edu.tr" placeholder="Student email">
@@ -49,6 +49,7 @@
         <input id="meta" value="Message types" placeholder="Objective / meta">
       </div>
       <button class="success" onclick="logScore()">Submit Score</button>
+      <button class="secondary" onclick="resetScoreForm()">Reset Form</button>
       <pre id="scoreOut"></pre>
     </section>
   </main>
