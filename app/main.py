@@ -1,7 +1,9 @@
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
+
 load_dotenv()
 
-from fastapi import FastAPI
 from app.services import (
     studentLogin,
     changeStudentPassword,
@@ -24,14 +26,25 @@ from app.services import (
     getActivityStats,
 )
 
+# 🔥 APP ÖNCE TANIMLANIR
 app = FastAPI(title="InClass LLM Platform")
 
+# 🔥 SONRA CORS EKLENİR
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5500", "http://127.0.0.1:5500"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
+# ---------- ROOT ----------
 @app.get("/")
 def root():
     return {"ok": True, "message": "API is running"}
 
 
+# ---------- STUDENT ----------
 @app.post("/student/login")
 def student_login(email: str, password: str):
     return studentLogin(email, password)
@@ -57,6 +70,7 @@ def student_log_score(email: str, password: str, course_id: str, activity_no: in
     return logScore(email, password, course_id, activity_no, score, meta)
 
 
+# ---------- INSTRUCTOR ----------
 @app.post("/instructor/login")
 def instructor_login(email: str, password: str):
     return instructorLogin(email, password)
@@ -83,7 +97,14 @@ def instructor_list_activities(email: str, password: str, course_id: str):
 
 
 @app.post("/instructor/create-activity")
-def instructor_create_activity(email: str, password: str, course_id: str, activity_text: str, learning_objectives: list[str], activity_no_optional: int | None = None):
+def instructor_create_activity(
+    email: str,
+    password: str,
+    course_id: str,
+    activity_text: str,
+    learning_objectives: list[str],
+    activity_no_optional: int | None = None
+):
     return createActivity(email, password, course_id, activity_text, learning_objectives, activity_no_optional)
 
 
@@ -126,6 +147,8 @@ def instructor_leaderboard(email: str, password: str, course_id: str):
 def instructor_activity_stats(email: str, password: str, course_id: str, activity_no: int):
     return getActivityStats(email, password, course_id, activity_no)
 
+
+# ---------- HEALTH ----------
 @app.get("/health")
 def health_check():
     return {"status": "ok"}

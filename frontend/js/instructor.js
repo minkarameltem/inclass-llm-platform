@@ -10,20 +10,24 @@ function courseId() {
 }
 
 function activityNo() {
-  return document.getElementById("activityNo").value.trim();
+  return parseInt(document.getElementById("activityNo").value.trim());
 }
 
 function niceMessage(data, successText) {
-  if (data.ok) {
-    return "✔ " + successText;
-  }
-  return "✖ " + data.message;
+  if (data.ok) return "✔ " + successText;
+  return "✖ " + (data.message || "Error");
 }
 
 async function login() {
   const data = await postRequest("/instructor/login", inst());
   document.getElementById("loginOut").textContent =
-    niceMessage(data, "Instructor login successful.");
+    niceMessage(data, "Login successful");
+}
+
+async function listCourses() {
+  const data = await postRequest("/instructor/list-my-courses", inst());
+  document.getElementById("courseOut").textContent =
+    JSON.stringify(data.data, null, 2);
 }
 
 async function listActivities() {
@@ -42,7 +46,7 @@ async function listActivities() {
 
   activities.forEach(a => {
     text += `Activity ${a.activity_no} | Status: ${a.status}\n`;
-    text += `${a.activity_text}\n\n`;
+    text += `${a.activity_text || ""}\n\n`;
   });
 
   document.getElementById("activityOut").textContent = text;
@@ -53,11 +57,12 @@ async function createActivity() {
     ...inst(),
     course_id: courseId(),
     activity_text: document.getElementById("activityText").value,
-    activity_no_optional: document.getElementById("newActivityNo").value
-  }, ["Message types", "Message format"]);
+    activity_no_optional: parseInt(document.getElementById("newActivityNo").value),
+    learning_objectives: ["Message types"]
+  });
 
   document.getElementById("createOut").textContent =
-    niceMessage(data, "Activity created successfully.");
+    niceMessage(data, "Created");
 }
 
 async function startActivity() {
@@ -68,7 +73,7 @@ async function startActivity() {
   });
 
   document.getElementById("activityOut").textContent =
-    niceMessage(data, "Activity started successfully.");
+    niceMessage(data, "Started");
 }
 
 async function endActivity() {
@@ -79,7 +84,35 @@ async function endActivity() {
   });
 
   document.getElementById("activityOut").textContent =
-    niceMessage(data, "Activity ended successfully.");
+    niceMessage(data, "Ended");
+}
+
+async function updateActivity() {
+  const data = await postRequest(
+    "/instructor/update-activity",
+    {
+      ...inst(),
+      course_id: courseId(),
+      activity_no: activityNo()
+    },
+    {
+      activity_text: document.getElementById("updateText").value
+    }
+  );
+
+  document.getElementById("activityOut").textContent =
+    niceMessage(data, "Updated");
+}
+
+async function resetActivity() {
+  const data = await postRequest("/instructor/reset-activity", {
+    ...inst(),
+    course_id: courseId(),
+    activity_no: activityNo()
+  });
+
+  document.getElementById("activityOut").textContent =
+    niceMessage(data, "Reset done");
 }
 
 async function exportScores() {
@@ -89,23 +122,8 @@ async function exportScores() {
     activity_no: activityNo()
   });
 
-  if (!data.ok) {
-    document.getElementById("scoreOut").textContent = "✖ " + data.message;
-    return;
-  }
-
-  const rows = data.data || [];
-  let text = "✔ Scores exported successfully.\n\n";
-
-  if (rows.length === 0) {
-    text += "No score records found for this activity.";
-  } else {
-    rows.forEach(r => {
-      text += `${r.student_email} | Score: ${r.score} | Meta: ${r.meta}\n`;
-    });
-  }
-
-  document.getElementById("scoreOut").textContent = text;
+  document.getElementById("scoreOut").textContent =
+    JSON.stringify(data.data, null, 2);
 }
 
 async function leaderboard() {
@@ -114,13 +132,7 @@ async function leaderboard() {
     course_id: courseId()
   });
 
-  if (!data.ok) {
-    document.getElementById("scoreOut").textContent = "✖ " + data.message;
-    return;
-  }
-
   document.getElementById("scoreOut").textContent =
-    "✔ Leaderboard loaded successfully.\n\n" +
     JSON.stringify(data.data, null, 2);
 }
 
@@ -131,12 +143,6 @@ async function stats() {
     activity_no: activityNo()
   });
 
-  if (!data.ok) {
-    document.getElementById("scoreOut").textContent = "✖ " + data.message;
-    return;
-  }
-
   document.getElementById("scoreOut").textContent =
-    "✔ Activity statistics loaded successfully.\n\n" +
     JSON.stringify(data.data, null, 2);
 }

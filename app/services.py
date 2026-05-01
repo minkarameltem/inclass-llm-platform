@@ -612,11 +612,6 @@ def exportScores(email: str, password: str, course_id: str, activity_no: int) ->
 def resetActivity(email: str, password: str, course_id: str, activity_no: int) -> dict:
     if not all([email, password, course_id]) or activity_no is None:
         return _error("Missing required fields")
-    
-    if "@" not in email:
-        return _error("Invalid email format")
-    if activity_no <= 0:
-        return _error("activity_no must be positive")
 
     if supabase is None:
         return _error("Database connection is not configured")
@@ -640,17 +635,24 @@ def resetActivity(email: str, password: str, course_id: str, activity_no: int) -
         if not check.data:
             return _error("Activity not found")
 
-        supabase.table("scores").delete().eq("course_id", course_id).eq("activity_no", activity_no).execute()
+        activity_id = check.data[0]["id"]
+
+        supabase.table("scores") \
+            .delete() \
+            .eq("course_id", course_id) \
+            .eq("activity_no", activity_no) \
+            .execute()
 
         response = (
             supabase
             .table("activities")
-            .update({"status": "ENDED"})
-            .eq("course_id", course_id)
-            .eq("activity_no", activity_no)
+            .update({"status": "NOT_STARTED"})
+            .eq("id", activity_id)
             .execute()
         )
+
         return _success(response.data, "Activity reset successfully")
+
     except Exception as e:
         return _error(f"Database error: {str(e)}")
 
@@ -677,10 +679,10 @@ def resetStudentPassword(email: str, password: str, course_id: str, student_emai
             .execute()
         )
         return _success(response.data, "Student password reset successfully")
+
     except Exception as e:
         return _error(f"Database error: {str(e)}")
-
-
+    
 def changeInstructorPassword(email: str, password: str, old_password: str, new_password: str) -> dict:
     if not all([email, password, old_password, new_password]):
         return _error("Missing required fields")
