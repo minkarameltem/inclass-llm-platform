@@ -43,6 +43,8 @@ async function login() {
 
     animatePanels();
   }
+  document.getElementById("loginOut").textContent =
+    niceMessage(data, "Student login successful.");
 }
 
 async function getActivity() {
@@ -74,6 +76,7 @@ async function getActivity() {
   document.getElementById("activityOut").textContent = renderActivityCard(activity);
   document.getElementById("activityOut").classList.add("activity-card");
   showToast("📘 Activity loaded successfully!");
+  document.getElementById("activityOut").textContent = text;
 }
 
 async function logScore() {
@@ -138,4 +141,5 @@ function resetScoreForm() {
   document.getElementById("score").value = "";
   document.getElementById("meta").value = "";
   document.getElementById("scoreOut").textContent = "Score form cleared.";
+}
 }
