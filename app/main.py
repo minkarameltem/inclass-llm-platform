@@ -5,6 +5,7 @@ from app.services import getLeaderboard
 from app.services import getActivityStats
 
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 from app.services import (
     studentLogin,
     instructorLogin,
@@ -26,6 +27,8 @@ from app.services import (
 )
 
 app = FastAPI(title="InClass LLM Platform")
+
+app.mount("/frontend", StaticFiles(directory="frontend", html=True), name="frontend")
 
 
 @app.get("/")
